@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-server
+  labels:
+    app: fastapi-server
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: fastapi-server
+    template:
+      metadata: 
+        labels:
+          app: fastapi-server
+      spec:
+        containers: 
+          - name: fastapi-server
+            image: suman1606/fastapi-server:latest
+            env:
+              - name: DATABASE_URL
+                value: "postgresql://postgres:password@postgres:5432/postgres"
+              - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+                value: "jaeger"
+            ports:
+              - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-server  
+spec:
+  selector:
+    app: fastapi-server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: clusterIP
